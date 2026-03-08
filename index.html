@@ -3,8 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>user ❤️</title>
+<title>Rukmini ❤️</title>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- PWA / Offline Support -->
+  <link rel="manifest" id="manifestPlaceholder">
+  <meta name="theme-color" content="#e91e8c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rukmini ❤️">
+  <script>
+    // Register Service Worker for offline use
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+const CACHE_NAME = 'rukmini-poster-v1';
+const urlsToCache = [
+  self.location.href,
+  'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap',
+  'https://fonts.gstatic.com'
+];
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return Promise.allSettled(urlsToCache.map(url => 
+        cache.add(url).catch(e => console.log('Cache miss:', url))
+      ));
+    })
+  );
+  self.skipWaiting();
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      if (response) return response;
+      return fetch(event.request).then(fetchResponse => {
+        if (fetchResponse && fetchResponse.status === 200) {
+          const responseClone = fetchResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+        }
+        return fetchResponse;
+      }).catch(() => caches.match(event.request));
+    })
+  );
+});
+`;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).then(reg => {
+        console.log('SW registered for offline use');
+      }).catch(err => console.log('SW registration failed:', err));
+    }
+
+    // Create and inject PWA manifest
+    const manifest = {
+      name: 'Rukmini Poster',
+      short_name: 'Rukmini ❤️',
+      description: 'Love poster maker',
+      start_url: '.',
+      display: 'standalone',
+      background_color: '#f8e8f0',
+      theme_color: '#e91e8c',
+      icons: [{
+        src: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>',
+        sizes: '192x192', type: 'image/svg+xml'
+      }]
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    const manifestUrl = URL.createObjectURL(manifestBlob);
+    document.getElementById('manifestPlaceholder').href = manifestUrl;
+  </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -17,7 +90,7 @@
     font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
     position: relative;
-    padding: 16px;
+    padding: 16px 16px 160px;
   }
 
   body::before {
@@ -29,6 +102,7 @@
     z-index: 0;
   }
 
+  /* ── POSTER ── */
   .poster {
     position: relative;
     width: 100%;
@@ -36,392 +110,352 @@
     min-height: 700px;
     background: linear-gradient(160deg, #fff0f7 0%, #fde8f2 50%, #f5e8ff 100%);
     border-radius: 24px;
-    box-shadow: 0 30px 80px rgba(233, 30, 140, 0.15), 0 0 0 1px rgba(233,30,140,0.08);
-    padding: clamp(16px, 4vw, 30px);
+    box-shadow: 0 30px 80px rgba(233,30,140,0.15), 0 0 0 1px rgba(233,30,140,0.08);
+    padding: clamp(16px,4vw,30px);
     overflow: hidden;
     z-index: 1;
+    transition: background 0.4s;
   }
 
-  /* Watermark */
   .watermark {
     position: absolute;
-    top: 14px;
-    left: 50%;
+    top: 14px; left: 50%;
     transform: translateX(-50%);
-    font-size: clamp(9px, 2vw, 11px);
-    color: #aaa;
-    letter-spacing: 1px;
-    z-index: 10;
-    white-space: nowrap;
+    font-size: clamp(9px,2vw,11px);
+    color: #aaa; letter-spacing: 1px;
+    z-index: 10; white-space: nowrap;
   }
 
-  /* Butterfly sticker top-left */
-  .sticker-butterfly {
-    position: absolute;
-    top: 30px;
-    left: clamp(8px, 3vw, 20px);
-    z-index: 20;
-    animation: flutter 3s ease-in-out infinite;
-  }
-  .sticker-butterfly svg { width: clamp(45px, 12vw, 70px); }
-  @keyframes flutter {
-    0%,100% { transform: rotate(-5deg) scale(1); }
-    50% { transform: rotate(5deg) scale(1.08); }
-  }
+  .sticker-butterfly { position: absolute; top: 30px; left: clamp(8px,3vw,20px); z-index: 20; animation: flutter 3s ease-in-out infinite; }
+  .sticker-butterfly svg { width: clamp(45px,12vw,70px); }
+  @keyframes flutter { 0%,100%{transform:rotate(-5deg) scale(1);} 50%{transform:rotate(5deg) scale(1.08);} }
 
   .sticker-butterflies-text {
-    position: absolute;
-    top: clamp(75px, 18vw, 95px);
-    left: clamp(4px, 2vw, 14px);
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(11px, 2.8vw, 15px);
-    color: #c2185b;
-    z-index: 20;
-    line-height: 1.3;
-    text-align: center;
-    width: clamp(80px, 22vw, 120px);
+    position: absolute; top: clamp(75px,18vw,95px); left: clamp(4px,2vw,14px);
+    font-family: 'Dancing Script', cursive; font-size: clamp(11px,2.8vw,15px);
+    color: #c2185b; z-index: 20; line-height: 1.3; text-align: center; width: clamp(80px,22vw,120px);
   }
 
-  /* I love you sticker top-right */
   .sticker-iloveyou {
-    position: absolute;
-    top: clamp(55px, 13vw, 70px);
-    right: clamp(8px, 3vw, 16px);
-    background: white;
-    border-radius: 50px;
-    padding: clamp(5px, 1.5vw, 8px) clamp(10px, 3vw, 18px);
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(15px, 4vw, 22px);
-    color: #c2185b;
-    box-shadow: 0 4px 16px rgba(194,24,91,0.18);
-    z-index: 20;
-    animation: pulse 2s ease-in-out infinite;
-    cursor: pointer;
-    transition: transform 0.3s;
+    position: absolute; top: clamp(55px,13vw,70px); right: clamp(8px,3vw,16px);
+    background: white; border-radius: 50px; padding: clamp(5px,1.5vw,8px) clamp(10px,3vw,18px);
+    font-family: 'Dancing Script', cursive; font-size: clamp(15px,4vw,22px);
+    color: #c2185b; box-shadow: 0 4px 16px rgba(194,24,91,0.18); z-index: 20;
+    animation: pulse 2s ease-in-out infinite; cursor: pointer; transition: transform 0.3s;
   }
   .sticker-iloveyou:hover { transform: scale(1.15) rotate(-3deg); }
   @keyframes pulse { 0%,100%{box-shadow:0 4px 16px rgba(194,24,91,0.18);} 50%{box-shadow:0 8px 28px rgba(194,24,91,0.35);} }
 
-  /* Main hero image */
   .hero-img {
-    position: absolute;
-    left: -10px;
-    top: 50px;
-    width: clamp(160px, 48vw, 280px);
-    z-index: 5;
+    position: absolute; left: -10px; top: 50px;
+    width: clamp(160px,48vw,280px); z-index: 5;
     transition: transform 0.4s ease, filter 0.4s ease;
-    cursor: pointer;
-    filter: drop-shadow(4px 0 20px rgba(233,30,140,0.2));
+    cursor: pointer; filter: drop-shadow(4px 0 20px rgba(233,30,140,0.2));
   }
-  .hero-img:hover {
-    transform: scale(1.04) translateX(6px);
-    filter: drop-shadow(8px 0 30px rgba(233,30,140,0.4));
-  }
-  .hero-img img {
-    width: 100%;
-    border-radius: 0 120px 120px 0;
-    display: block;
-  }
+  .hero-img:hover { transform: scale(1.04) translateX(6px); filter: drop-shadow(8px 0 30px rgba(233,30,140,0.4)); }
+  .hero-img img { width: 100%; border-radius: 0 120px 120px 0; display: block; }
   .hero-img .placeholder {
-    width: 100%;
-    height: clamp(280px, 65vw, 480px);
-    border-radius: 0 120px 120px 0;
-    background: linear-gradient(135deg, #f48fb1, #e91e8c, #880e4f);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: clamp(10px, 2.5vw, 13px);
-    text-align: center;
-    padding: 20px;
+    width: 100%; height: clamp(280px,65vw,480px); border-radius: 0 120px 120px 0;
+    background: linear-gradient(135deg,#f48fb1,#e91e8c,#880e4f);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: clamp(10px,2.5vw,13px); text-align: center; padding: 20px;
   }
 
-  /* Circle collage */
   .circle-collage {
-    position: absolute;
-    right: clamp(6px, 2vw, 10px);
-    top: clamp(100px, 25vw, 120px);
-    width: clamp(130px, 40vw, 240px);
-    height: clamp(190px, 58vw, 340px);
-    border-radius: 50%;
-    overflow: hidden;
-    z-index: 4;
+    position: absolute; right: clamp(6px,2vw,10px); top: clamp(100px,25vw,120px);
+    width: clamp(130px,40vw,240px); height: clamp(190px,58vw,340px);
+    border-radius: 50%; overflow: hidden; z-index: 4;
     box-shadow: 0 8px 40px rgba(0,0,0,0.12);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr;
   }
 
-  .collage-cell {
-    overflow: hidden;
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.4s ease;
-  }
-  .collage-cell::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(233, 30, 140, 0);
-    transition: background 0.3s;
-  }
-  .collage-cell:hover::after { background: rgba(233,30,140,0.2); }
-  .collage-cell:hover { transform: scale(1.06); z-index: 2; }
+  .collage-cell { overflow: hidden; position: relative; cursor: pointer; transition: transform 0.4s ease; }
+  .collage-cell::after { content:''; position:absolute; inset:0; background:rgba(233,30,140,0); transition:background 0.3s; }
+  .collage-cell:hover::after { background:rgba(233,30,140,0.2); }
+  .collage-cell:hover { transform:scale(1.06); z-index:2; }
+  .collage-cell .placeholder { width:100%; height:100%; background:linear-gradient(135deg,#bdbdbd,#757575); display:flex; align-items:center; justify-content:center; color:white; font-size:clamp(7px,2vw,10px); text-align:center; padding:8px; }
+  .collage-cell img { width:100%; height:100%; object-fit:cover; filter:grayscale(100%); transition:filter 0.4s; }
+  .collage-cell:hover img { filter:grayscale(0%); }
 
-  .collage-cell .placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #bdbdbd, #757575);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: clamp(7px, 2vw, 10px);
-    text-align: center;
-    padding: 8px;
-  }
-  .collage-cell img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: filter 0.4s; }
-  .collage-cell:hover img { filter: grayscale(0%); }
-
-  /* Heartbeat sticker */
   .sticker-heartbeat {
-    position: absolute;
-    right: clamp(30px, 12vw, 60px);
-    top: clamp(195px, 52vw, 285px);
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: white;
-    border-radius: 20px;
-    padding: clamp(3px, 1vw, 5px) clamp(7px, 2vw, 12px);
+    position: absolute; right: clamp(30px,12vw,60px); top: clamp(195px,52vw,285px);
+    z-index: 20; display: flex; align-items: center; gap: 4px;
+    background: white; border-radius: 20px; padding: clamp(3px,1vw,5px) clamp(7px,2vw,12px);
     box-shadow: 0 4px 14px rgba(233,30,140,0.15);
   }
-  .heartbeat-line { color: #e91e8c; font-size: clamp(12px, 3.5vw, 18px); }
-  .heart-icon { color: #e91e8c; font-size: clamp(12px, 3.5vw, 18px); animation: heartBeat 1s ease infinite; }
+  .heartbeat-line { color:#e91e8c; font-size:clamp(12px,3.5vw,18px); }
+  .heart-icon { color:#e91e8c; font-size:clamp(12px,3.5vw,18px); animation:heartBeat 1s ease infinite; }
   @keyframes heartBeat { 0%,100%{transform:scale(1);} 50%{transform:scale(1.3);} }
 
-  /* Camera sticker */
-  .sticker-camera {
-    position: absolute;
-    left: clamp(6px, 2vw, 14px);
-    top: clamp(270px, 72vw, 370px);
-    z-index: 20;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.3s;
-  }
-  .sticker-camera:hover { transform: rotate(-10deg) scale(1.1); }
-  .sticker-camera .cam-label {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(10px, 2.8vw, 14px);
-    color: #880e4f;
-    margin-top: 4px;
-  }
-  .sticker-camera svg { width: clamp(36px, 10vw, 55px); }
+  .sticker-camera { position:absolute; left:clamp(6px,2vw,14px); top:clamp(270px,72vw,370px); z-index:20; text-align:center; cursor:pointer; transition:transform 0.3s; }
+  .sticker-camera:hover { transform:rotate(-10deg) scale(1.1); }
+  .sticker-camera .cam-label { font-family:'Dancing Script',cursive; font-size:clamp(10px,2.8vw,14px); color:#880e4f; margin-top:4px; }
+  .sticker-camera svg { width:clamp(36px,10vw,55px); }
 
-  /* Flower */
-  .flower-sticker {
-    position: absolute;
-    left: clamp(110px, 36vw, 195px);
-    top: clamp(240px, 62vw, 340px);
-    z-index: 15;
-    animation: sway 4s ease-in-out infinite;
-    cursor: pointer;
-    transition: transform 0.3s;
-  }
-  .flower-sticker:hover { transform: scale(1.2) rotate(20deg); }
+  .flower-sticker { position:absolute; left:clamp(110px,36vw,195px); top:clamp(240px,62vw,340px); z-index:15; animation:sway 4s ease-in-out infinite; cursor:pointer; transition:transform 0.3s; }
+  .flower-sticker:hover { transform:scale(1.2) rotate(20deg); }
   @keyframes sway { 0%,100%{transform:rotate(-5deg);} 50%{transform:rotate(5deg);} }
-  .flower-sticker svg { width: clamp(45px, 13vw, 75px); }
+  .flower-sticker svg { width:clamp(45px,13vw,75px); }
 
-  /* Bottom collage row */
-  .bottom-collage {
-    position: absolute;
-    bottom: 90px;
-    left: clamp(10px, 3vw, 20px);
-    right: clamp(10px, 3vw, 20px);
-    display: flex;
-    gap: clamp(5px, 2vw, 10px);
-    z-index: 6;
-  }
-  .bottom-cell {
-    flex: 1;
-    height: clamp(80px, 22vw, 130px);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    transition: transform 0.4s ease, box-shadow 0.4s;
-  }
-  .bottom-cell:hover { transform: translateY(-6px) scale(1.04); box-shadow: 0 12px 30px rgba(233,30,140,0.25); }
-  .bottom-cell .placeholder {
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, #bdbdbd, #616161);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: clamp(7px, 2vw, 10px); text-align: center; padding: 8px;
-  }
-  .bottom-cell img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(90%); transition: filter 0.4s; }
-  .bottom-cell:hover img { filter: grayscale(0%); }
+  .bottom-collage { position:absolute; bottom:90px; left:clamp(10px,3vw,20px); right:clamp(10px,3vw,20px); display:flex; gap:clamp(5px,2vw,10px); z-index:6; }
+  .bottom-cell { flex:1; height:clamp(80px,22vw,130px); border-radius:14px; overflow:hidden; cursor:pointer; position:relative; box-shadow:0 4px 16px rgba(0,0,0,0.1); transition:transform 0.4s ease, box-shadow 0.4s; }
+  .bottom-cell:hover { transform:translateY(-6px) scale(1.04); box-shadow:0 12px 30px rgba(233,30,140,0.25); }
+  .bottom-cell .placeholder { width:100%; height:100%; background:linear-gradient(135deg,#bdbdbd,#616161); display:flex; align-items:center; justify-content:center; color:white; font-size:clamp(7px,2vw,10px); text-align:center; padding:8px; }
+  .bottom-cell img { width:100%; height:100%; object-fit:cover; filter:grayscale(90%); transition:filter 0.4s; }
+  .bottom-cell:hover img { filter:grayscale(0%); }
 
-  /* Forever sticker */
   .sticker-forever {
-    position: absolute;
-    right: clamp(6px, 2vw, 14px);
-    top: clamp(330px, 88vw, 460px);
-    z-index: 20;
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(12px, 3.5vw, 18px);
-    color: #c2185b;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: white;
-    border-radius: 20px;
-    padding: clamp(3px, 1vw, 4px) clamp(8px, 2.5vw, 12px);
-    box-shadow: 0 4px 14px rgba(194,24,91,0.15);
+    position:absolute; right:clamp(6px,2vw,14px); top:clamp(330px,88vw,460px);
+    z-index:20; font-family:'Dancing Script',cursive; font-size:clamp(12px,3.5vw,18px);
+    color:#c2185b; display:flex; align-items:center; gap:4px;
+    background:white; border-radius:20px; padding:clamp(3px,1vw,4px) clamp(8px,2.5vw,12px);
+    box-shadow:0 4px 14px rgba(194,24,91,0.15);
   }
 
-  /* Balloons */
-  .balloons {
-    position: absolute;
-    bottom: 115px;
-    right: clamp(20px, 10vw, 55px);
-    z-index: 18;
-    animation: float 3s ease-in-out infinite;
-  }
+  .balloons { position:absolute; bottom:115px; right:clamp(20px,10vw,55px); z-index:18; animation:float 3s ease-in-out infinite; }
   @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
-  .balloons svg { width: clamp(32px, 9vw, 50px); }
+  .balloons svg { width:clamp(32px,9vw,50px); }
 
-  /* Name */
   .name-title {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(36px, 11vw, 58px);
-    font-weight: 700;
-    color: #1a1a1a;
-    letter-spacing: 2px;
-    white-space: nowrap;
-    z-index: 10;
-    text-shadow: 2px 2px 0px rgba(233,30,140,0.1);
-    transition: letter-spacing 0.4s, color 0.4s;
-    cursor: default;
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+    font-family:'Dancing Script',cursive; font-size:clamp(36px,11vw,58px); font-weight:700;
+    color:#1a1a1a; letter-spacing:2px; white-space:nowrap; z-index:10;
+    text-shadow:2px 2px 0px rgba(233,30,140,0.1); transition:letter-spacing 0.4s, color 0.4s; cursor:default;
   }
-  .name-title:hover {
-    letter-spacing: 6px;
-    color: #c2185b;
-  }
+  .name-title:hover { letter-spacing:6px; color:#c2185b; }
 
-  /* Music control */
   .music-btn {
-    position: absolute;
-    bottom: 18px;
-    right: 18px;
-    width: clamp(32px, 8vw, 38px);
-    height: clamp(32px, 8vw, 38px);
-    background: white;
-    border-radius: 50%;
-    border: 2px solid #e91e8c;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(233,30,140,0.2);
-    z-index: 30;
-    transition: transform 0.3s, background 0.3s;
+    position:absolute; bottom:18px; right:18px;
+    width:clamp(32px,8vw,38px); height:clamp(32px,8vw,38px);
+    background:white; border-radius:50%; border:2px solid #e91e8c;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; box-shadow:0 4px 14px rgba(233,30,140,0.2);
+    z-index:30; transition:transform 0.3s, background 0.3s, opacity 0.6s;
+    opacity:0; pointer-events:none;
   }
-  .music-btn:hover { transform: scale(1.15); background: #e91e8c; }
-  .music-btn:hover svg path { fill: white; }
-  .music-btn svg { width: clamp(14px, 4vw, 18px); }
+  .music-btn.visible { opacity:1; pointer-events:auto; }
+  .music-btn:hover { transform:scale(1.15); background:#e91e8c; }
+  .music-btn:hover svg path { fill:white; }
+  .music-btn svg { width:clamp(14px,4vw,18px); }
 
-  /* Floating hearts */
-  .floating-hearts {
+  .floating-hearts { position:fixed; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .fheart { position:absolute; bottom:-20px; font-size:18px; animation:riseUp linear infinite; opacity:0; }
+  @keyframes riseUp { 0%{bottom:-20px;opacity:0.8;transform:translateX(0) scale(1);} 100%{bottom:110%;opacity:0;transform:translateX(40px) scale(0.5);} }
+
+  .collage-cell::before { content:'📸 Tap'; position:absolute; bottom:6px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); color:white; font-size:9px; padding:2px 8px; border-radius:10px; white-space:nowrap; opacity:0; transition:opacity 0.3s; z-index:5; }
+  .collage-cell:hover::before { opacity:1; }
+  .bottom-cell::before { content:'📸 Tap'; position:absolute; bottom:6px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); color:white; font-size:9px; padding:2px 8px; border-radius:10px; white-space:nowrap; opacity:0; transition:opacity 0.3s; z-index:5; }
+  .bottom-cell:hover::before { opacity:1; }
+
+  /* ── BOTTOM BAR ── */
+  .action-bar {
+    position:fixed; bottom:0; left:0; right:0;
+    display:flex; gap:8px; padding:10px 12px;
+    background:rgba(255,255,255,0.97);
+    backdrop-filter:blur(12px);
+    box-shadow:0 -4px 20px rgba(233,30,140,0.12);
+    z-index:100;
+  }
+  .action-btn {
+    flex:1; padding:11px 6px; border:none; border-radius:50px;
+    font-family:'Poppins',sans-serif; font-size:12px; font-weight:600;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:5px; transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .action-btn:active { transform:scale(0.95); }
+  .btn-edit { background:linear-gradient(135deg,#7c3aed,#a855f7); color:white; box-shadow:0 4px 14px rgba(124,58,237,0.3); }
+  .btn-save { background:linear-gradient(135deg,#e91e8c,#c2185b); color:white; box-shadow:0 4px 14px rgba(233,30,140,0.3); }
+  .btn-share { background:white; color:#c2185b; border:2px solid #e91e8c; }
+
+  /* ── EDIT PANEL ── */
+  .edit-panel {
+    position:fixed; bottom:-100%; left:0; right:0;
+    background:white; border-radius:28px 28px 0 0;
+    box-shadow:0 -8px 40px rgba(0,0,0,0.15);
+    z-index:200; padding:0 0 30px;
+    transition:bottom 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    max-height:85vh; overflow-y:auto;
+  }
+  .edit-panel.open { bottom:0; }
+
+  .panel-handle { width:40px; height:4px; background:#e0e0e0; border-radius:4px; margin:12px auto 0; }
+
+  .panel-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px 10px;
+    position:sticky; top:0; background:white; z-index:2;
+    border-bottom:1px solid #fce4ec;
+  }
+  .panel-title { font-size:16px; font-weight:700; color:#c2185b; }
+  .panel-close { width:32px; height:32px; border:none; background:#fce4ec; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#c2185b; }
+
+  .panel-tabs { display:flex; gap:6px; padding:12px 16px 0; overflow-x:auto; scrollbar-width:none; }
+  .panel-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn {
+    flex-shrink:0; padding:7px 14px; border:none; border-radius:50px;
+    font-family:'Poppins',sans-serif; font-size:12px; font-weight:600;
+    cursor:pointer; background:#f5f5f5; color:#888; transition:all 0.2s;
+  }
+  .tab-btn.active { background:linear-gradient(135deg,#e91e8c,#c2185b); color:white; box-shadow:0 3px 10px rgba(233,30,140,0.3); }
+
+  .tab-content { display:none; padding:14px 16px; }
+  .tab-content.active { display:block; }
+
+  /* Edit fields */
+  .edit-row { margin-bottom:14px; }
+  .edit-label { font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+  .edit-input {
+    width:100%; padding:10px 14px; border:2px solid #fce4ec; border-radius:12px;
+    font-family:'Poppins',sans-serif; font-size:14px; color:#333;
+    outline:none; transition:border 0.2s;
+  }
+  .edit-input:focus { border-color:#e91e8c; }
+
+  /* Color swatches */
+  .swatch-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .swatch {
+    width:32px; height:32px; border-radius:50%; cursor:pointer;
+    border:3px solid transparent; transition:transform 0.2s, border 0.2s;
+  }
+  .swatch:hover { transform:scale(1.15); }
+  .swatch.selected { border-color:#333; transform:scale(1.1); }
+
+  /* Font size slider */
+  .slider-row { display:flex; align-items:center; gap:10px; }
+  .range-slider { flex:1; -webkit-appearance:none; height:4px; border-radius:4px; background:#fce4ec; outline:none; }
+  .range-slider::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#e91e8c; cursor:pointer; }
+  .slider-val { font-size:13px; font-weight:600; color:#c2185b; min-width:30px; text-align:right; }
+
+  /* BG theme cards */
+  .theme-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .theme-card {
+    height:60px; border-radius:12px; cursor:pointer; border:3px solid transparent;
+    transition:transform 0.2s, border 0.2s; display:flex; align-items:center;
+    justify-content:center; font-size:11px; font-weight:600; color:rgba(255,255,255,0.9);
+  }
+  .theme-card:hover { transform:scale(1.04); }
+  .theme-card.selected { border-color:#333; }
+
+  /* Sticker toggles */
+  .sticker-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #fafafa; }
+  .sticker-toggle-label { font-size:13px; color:#444; }
+  .toggle-switch { position:relative; width:44px; height:24px; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-slider { position:absolute; cursor:pointer; inset:0; background:#e0e0e0; border-radius:24px; transition:0.3s; }
+  .toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; }
+  input:checked + .toggle-slider { background:#e91e8c; }
+  input:checked + .toggle-slider:before { transform:translateX(20px); }
+
+  /* Overlay */
+  .panel-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:199; backdrop-filter:blur(2px); }
+  .panel-overlay.open { display:block; }
+
+  /* Toast */
+  .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-80px); background:#333; color:white; padding:10px 24px; border-radius:50px; font-size:13px; z-index:300; transition:transform 0.3s; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* Loading */
+  .loading-overlay { display:none; position:fixed; inset:0; background:rgba(255,255,255,0.9); z-index:250; align-items:center; justify-content:center; flex-direction:column; gap:12px; font-family:'Poppins',sans-serif; font-size:14px; color:#c2185b; }
+  .loading-overlay.active { display:flex; }
+  .spinner { width:36px; height:36px; border:3px solid #fce4ec; border-top-color:#e91e8c; border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg);} }
+
+  @media (max-width:400px) {
+    .poster { min-height:580px; }
+    .bottom-collage { bottom:80px; }
+  }
+
+  /* Offline banner */
+  .offline-banner {
+    display: none;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .fheart {
-    position: absolute;
-    bottom: -20px;
-    font-size: 18px;
-    animation: riseUp linear infinite;
-    opacity: 0;
-  }
-  @keyframes riseUp {
-    0% { bottom: -20px; opacity: 0.8; transform: translateX(0) scale(1); }
-    100% { bottom: 110%; opacity: 0; transform: translateX(40px) scale(0.5); }
-  }
-
-  .collage-cell::before {
-    content: '📸 Tap to add';
-    position: absolute;
-    bottom: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.6);
+    top: 0; left: 0; right: 0;
+    background: #333;
     color: white;
-    font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 5;
+    text-align: center;
+    padding: 8px;
+    font-size: 12px;
+    z-index: 9999;
+    font-family: 'Poppins', sans-serif;
   }
-  .collage-cell:hover::before { opacity: 1; }
-  .bottom-cell::before {
-    content: '📸 Tap to add';
-    position: absolute;
-    bottom: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.6);
+  .offline-banner.show { display: block; }
+  .install-btn {
+    display: none;
+    position: fixed;
+    top: 10px; right: 10px;
+    background: linear-gradient(135deg, #e91e8c, #c2185b);
     color: white;
-    font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 5;
+    border: none;
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 9998;
+    box-shadow: 0 4px 14px rgba(233,30,140,0.4);
+    animation: pulse 2s ease-in-out infinite;
   }
-  .bottom-cell:hover::before { opacity: 1; }
+  .install-btn.show { display: block; }
 
-  @media (max-width: 400px) {
-    .poster { min-height: 580px; }
-    .bottom-collage { bottom: 80px; }
+
+  /* Music tab styles */
+  .music-preset-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:4px; }
+  .music-preset-card {
+    padding:10px 8px; border-radius:12px; border:2px solid #fce4ec;
+    background:#fff9fb; cursor:pointer; text-align:center;
+    transition:all 0.2s; font-family:'Poppins',sans-serif;
   }
+  .music-preset-card:hover { border-color:#e91e8c; background:#fce4ec; }
+  .music-preset-card.playing { border-color:#e91e8c; background:linear-gradient(135deg,#fce4ec,#f8bbd0); box-shadow:0 4px 14px rgba(233,30,140,0.2); }
+  .music-preset-card .song-icon { font-size:24px; margin-bottom:4px; }
+  .music-preset-card .song-name { font-size:11px; font-weight:600; color:#c2185b; }
+  .music-preset-card .song-mood { font-size:10px; color:#999; margin-top:2px; }
+  .music-upload-area {
+    border:2px dashed #f48fb1; border-radius:14px; padding:18px;
+    text-align:center; cursor:pointer; transition:all 0.2s;
+    background:#fff9fb; margin-top:12px;
+  }
+  .music-upload-area:hover { border-color:#e91e8c; background:#fce4ec; }
+  .music-upload-area .upload-icon { font-size:28px; margin-bottom:6px; }
+  .music-upload-area .upload-text { font-size:13px; font-weight:600; color:#c2185b; }
+  .music-upload-area .upload-sub { font-size:11px; color:#999; margin-top:3px; }
+  .music-now-playing {
+    display:none; background:linear-gradient(135deg,#fce4ec,#f8bbd0);
+    border-radius:14px; padding:12px 16px; margin-bottom:12px;
+    align-items:center; gap:10px;
+  }
+  .music-now-playing.show { display:flex; }
+  .now-play-icon { font-size:22px; animation:spin 2s linear infinite; }
+  .now-play-info { flex:1; }
+  .now-play-name { font-size:13px; font-weight:700; color:#c2185b; }
+  .now-play-sub { font-size:11px; color:#e91e8c; opacity:0.8; }
+  .now-play-stop { background:#e91e8c; border:none; border-radius:50px; color:white; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; }
+  .volume-row { display:flex; align-items:center; gap:10px; margin-top:4px; }
+  .vol-icon { font-size:16px; }
+
 </style>
 </head>
 <body>
 
+
+<!-- Offline status banner -->
+<div class="offline-banner" id="offlineBanner">📵 You're offline — but the poster still works!</div>
+<button class="install-btn" id="installBtn">📲 Install App</button>
+
 <div class="floating-hearts" id="heartsContainer"></div>
 
-<div class="poster">
-  <div class="watermark">Sai Official</div>
+<div class="poster" id="poster">
+  <div class="watermark" id="watermarkEl">Vetri Editz Official</div>
 
-  <div class="sticker-butterfly">
-    <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="30" cy="30" rx="28" ry="22" fill="#f48fb1" opacity="0.85"/>
-      <ellipse cx="70" cy="30" rx="28" ry="22" fill="#e91e8c" opacity="0.85"/>
-      <ellipse cx="35" cy="55" rx="18" ry="14" fill="#f06292" opacity="0.8"/>
-      <ellipse cx="65" cy="55" rx="18" ry="14" fill="#ec407a" opacity="0.8"/>
-      <line x1="50" y1="10" x2="50" y2="70" stroke="#880e4f" stroke-width="2.5"/>
-      <path d="M44 12 Q50 0 56 12" stroke="#880e4f" stroke-width="1.5" fill="none"/>
-      <circle cx="28" cy="26" r="5" fill="white" opacity="0.4"/>
-      <circle cx="72" cy="26" r="5" fill="white" opacity="0.4"/>
-    </svg>
+  <div class="sticker-butterfly" id="stickerButterfly">
+    <svg viewBox="0 0 100 80" fill="none"><ellipse cx="30" cy="30" rx="28" ry="22" fill="#f48fb1" opacity="0.85"/><ellipse cx="70" cy="30" rx="28" ry="22" fill="#e91e8c" opacity="0.85"/><ellipse cx="35" cy="55" rx="18" ry="14" fill="#f06292" opacity="0.8"/><ellipse cx="65" cy="55" rx="18" ry="14" fill="#ec407a" opacity="0.8"/><line x1="50" y1="10" x2="50" y2="70" stroke="#880e4f" stroke-width="2.5"/><path d="M44 12 Q50 0 56 12" stroke="#880e4f" stroke-width="1.5" fill="none"/><circle cx="28" cy="26" r="5" fill="white" opacity="0.4"/><circle cx="72" cy="26" r="5" fill="white" opacity="0.4"/></svg>
   </div>
-  <div class="sticker-butterflies-text">You still give me<br>🦋 <em>butterflies</em></div>
+  <div class="sticker-butterflies-text" id="stickerButterflyText">You still give me<br>🦋 <em>butterflies</em></div>
 
-  <div class="sticker-iloveyou">i <span style="color:#e91e8c">♥</span> love you</div>
+  <div class="sticker-iloveyou" id="stickerLove">i <span style="color:#e91e8c">♥</span> love you</div>
 
-  <div class="hero-img" title="Tap to add main photo">
+  <div class="hero-img" id="heroImg" title="Tap to add main photo">
     <div class="placeholder">🌸 Tap to add<br>Main Photo</div>
   </div>
 
@@ -433,39 +467,19 @@
     <div class="collage-cell" style="grid-column:1/3;grid-row:3;"><div class="placeholder">Photo 5</div></div>
   </div>
 
-  <div class="sticker-heartbeat">
+  <div class="sticker-heartbeat" id="stickerHeartbeat">
     <span class="heartbeat-line">〰️</span>
     <span class="heart-icon">♥</span>
     <span class="heartbeat-line">〰️</span>
   </div>
 
-  <div class="sticker-camera">
-    <svg viewBox="0 0 80 65" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="5" y="18" width="70" height="42" rx="8" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="2"/>
-      <rect x="20" y="10" width="40" height="12" rx="4" fill="#bdbdbd"/>
-      <circle cx="40" cy="39" r="14" fill="white" stroke="#9e9e9e" stroke-width="2"/>
-      <circle cx="40" cy="39" r="9" fill="#757575"/>
-      <circle cx="40" cy="39" r="5" fill="#424242"/>
-      <circle cx="37" cy="36" r="2" fill="white" opacity="0.6"/>
-      <rect x="60" y="22" width="8" height="6" rx="2" fill="#ef9a9a"/>
-    </svg>
+  <div class="sticker-camera" id="stickerCamera">
+    <svg viewBox="0 0 80 65" fill="none"><rect x="5" y="18" width="70" height="42" rx="8" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="2"/><rect x="20" y="10" width="40" height="12" rx="4" fill="#bdbdbd"/><circle cx="40" cy="39" r="14" fill="white" stroke="#9e9e9e" stroke-width="2"/><circle cx="40" cy="39" r="9" fill="#757575"/><circle cx="40" cy="39" r="5" fill="#424242"/><circle cx="37" cy="36" r="2" fill="white" opacity="0.6"/><rect x="60" y="22" width="8" height="6" rx="2" fill="#ef9a9a"/></svg>
     <div class="cam-label">Capture<br>the<br>moment</div>
   </div>
 
-  <div class="flower-sticker">
-    <svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <line x1="50" y1="55" x2="50" y2="108" stroke="#4caf50" stroke-width="3"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9" transform="rotate(45 50 35)"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9" transform="rotate(90 50 35)"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9" transform="rotate(135 50 35)"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(22 50 35)"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(67 50 35)"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(112 50 35)"/>
-      <ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(157 50 35)"/>
-      <circle cx="50" cy="35" r="13" fill="#fff176"/>
-      <circle cx="50" cy="35" r="8" fill="#fdd835"/>
-    </svg>
+  <div class="flower-sticker" id="stickerFlower">
+    <svg viewBox="0 0 100 110" fill="none"><line x1="50" y1="55" x2="50" y2="108" stroke="#4caf50" stroke-width="3"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9" transform="rotate(45 50 35)"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9" transform="rotate(90 50 35)"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f8bbd0" opacity="0.9" transform="rotate(135 50 35)"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(22 50 35)"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(67 50 35)"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(112 50 35)"/><ellipse cx="50" cy="35" rx="14" ry="20" fill="#f48fb1" opacity="0.7" transform="rotate(157 50 35)"/><circle cx="50" cy="35" r="13" fill="#fff176"/><circle cx="50" cy="35" r="8" fill="#fdd835"/></svg>
   </div>
 
   <div class="bottom-collage">
@@ -474,39 +488,295 @@
     <div class="bottom-cell"><div class="placeholder">Photo 8</div></div>
   </div>
 
-  <div class="sticker-forever">∞ forever ❤️</div>
+  <div class="sticker-forever" id="stickerForever">∞ forever ❤️</div>
 
-  <div class="balloons">
-    <svg viewBox="0 0 70 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="22" cy="28" rx="18" ry="22" fill="#e53935"/>
-      <ellipse cx="48" cy="22" rx="18" ry="22" fill="#e53935"/>
-      <ellipse cx="35" cy="36" rx="15" ry="19" fill="#f44336"/>
-      <path d="M22 50 Q25 65 30 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/>
-      <path d="M48 44 Q45 60 40 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/>
-      <path d="M35 55 Q35 68 35 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/>
-      <path d="M30 70 Q35 75 40 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/>
-      <ellipse cx="17" cy="22" rx="5" ry="7" fill="white" opacity="0.35"/>
-      <ellipse cx="43" cy="16" rx="5" ry="7" fill="white" opacity="0.35"/>
-    </svg>
+  <div class="balloons" id="stickerBalloons">
+    <svg viewBox="0 0 70 90" fill="none"><ellipse cx="22" cy="28" rx="18" ry="22" fill="#e53935"/><ellipse cx="48" cy="22" rx="18" ry="22" fill="#e53935"/><ellipse cx="35" cy="36" rx="15" ry="19" fill="#f44336"/><path d="M22 50 Q25 65 30 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/><path d="M48 44 Q45 60 40 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/><path d="M35 55 Q35 68 35 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/><path d="M30 70 Q35 75 40 70" stroke="#b71c1c" stroke-width="1.5" fill="none"/><ellipse cx="17" cy="22" rx="5" ry="7" fill="white" opacity="0.35"/><ellipse cx="43" cy="16" rx="5" ry="7" fill="white" opacity="0.35"/></svg>
   </div>
 
-  <div class="name-title">USER</div>
+  <div class="name-title" id="nameTitleEl">Rukmini</div>
 
-  <div class="music-btn" id="musicBtn" title="Toggle background music">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path id="musicIcon" fill="#e91e8c" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-    </svg>
+  <div class="music-btn" id="musicBtn">
+    <svg viewBox="0 0 24 24"><path id="musicIcon" fill="#e91e8c" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
   </div>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div>Preparing your poster...</div>
+</div>
+
+<!-- Panel overlay -->
+<div class="panel-overlay" id="panelOverlay"></div>
+
+<!-- EDIT PANEL -->
+<div class="edit-panel" id="editPanel">
+  <div class="panel-handle"></div>
+  <div class="panel-header">
+    <div class="panel-title">✏️ Edit Poster</div>
+    <button class="panel-close" id="panelClose">✕</button>
+  </div>
+
+  <div class="panel-tabs">
+    <button class="tab-btn active" data-tab="text">📝 Text</button>
+    <button class="tab-btn" data-tab="colors">🎨 Colors</button>
+    <button class="tab-btn" data-tab="background">🖼️ Background</button>
+    <button class="tab-btn" data-tab="stickers">✨ Stickers</button>
+    <button class="tab-btn" data-tab="watermark">🏷️ Watermark</button>
+    <button class="tab-btn" data-tab="music">🎵 Music</button>
+  </div>
+
+  <!-- TEXT TAB -->
+  <div class="tab-content active" data-tab="text">
+    <div class="edit-row">
+      <div class="edit-label">Name on Poster</div>
+      <input class="edit-input" id="nameInput" type="text" value="Rukmini" placeholder="Enter name...">
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Name Font Size</div>
+      <div class="slider-row">
+        <input class="range-slider" id="fontSizeSlider" type="range" min="24" max="80" value="58">
+        <span class="slider-val" id="fontSizeVal">58px</span>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Name Color</div>
+      <div class="swatch-row">
+        <div class="swatch selected" style="background:#1a1a1a" data-color="#1a1a1a" data-target="name"></div>
+        <div class="swatch" style="background:#c2185b" data-color="#c2185b" data-target="name"></div>
+        <div class="swatch" style="background:#e91e8c" data-color="#e91e8c" data-target="name"></div>
+        <div class="swatch" style="background:#6a1b9a" data-color="#6a1b9a" data-target="name"></div>
+        <div class="swatch" style="background:#1565c0" data-color="#1565c0" data-target="name"></div>
+        <div class="swatch" style="background:#2e7d32" data-color="#2e7d32" data-target="name"></div>
+        <div class="swatch" style="background:#bf360c" data-color="#bf360c" data-target="name"></div>
+        <div class="swatch" style="background:#fff" data-color="#ffffff" data-target="name" style="border:1px solid #eee"></div>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">"I Love You" Text</div>
+      <input class="edit-input" id="loveInput" type="text" value="i ♥ love you" placeholder="Custom love message...">
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Forever Text</div>
+      <input class="edit-input" id="foreverInput" type="text" value="∞ forever ❤️" placeholder="Forever message...">
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Butterfly Text</div>
+      <input class="edit-input" id="butterflyInput" type="text" value="You still give me 🦋 butterflies" placeholder="Butterfly sticker text...">
+    </div>
+  </div>
+
+  <!-- COLORS TAB -->
+  <div class="tab-content" data-tab="colors">
+    <div class="edit-row">
+      <div class="edit-label">Love Sticker Color</div>
+      <div class="swatch-row">
+        <div class="swatch selected" style="background:#c2185b" data-color="#c2185b" data-target="love"></div>
+        <div class="swatch" style="background:#e91e8c" data-color="#e91e8c" data-target="love"></div>
+        <div class="swatch" style="background:#6a1b9a" data-color="#6a1b9a" data-target="love"></div>
+        <div class="swatch" style="background:#1565c0" data-color="#1565c0" data-target="love"></div>
+        <div class="swatch" style="background:#00695c" data-color="#00695c" data-target="love"></div>
+        <div class="swatch" style="background:#e65100" data-color="#e65100" data-target="love"></div>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Forever Sticker Color</div>
+      <div class="swatch-row">
+        <div class="swatch selected" style="background:#c2185b" data-color="#c2185b" data-target="forever"></div>
+        <div class="swatch" style="background:#e91e8c" data-color="#e91e8c" data-target="forever"></div>
+        <div class="swatch" style="background:#6a1b9a" data-color="#6a1b9a" data-target="forever"></div>
+        <div class="swatch" style="background:#1565c0" data-color="#1565c0" data-target="forever"></div>
+        <div class="swatch" style="background:#00695c" data-color="#00695c" data-target="forever"></div>
+        <div class="swatch" style="background:#e65100" data-color="#e65100" data-target="forever"></div>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Heart Color</div>
+      <div class="swatch-row">
+        <div class="swatch selected" style="background:#e91e8c" data-color="#e91e8c" data-target="heart"></div>
+        <div class="swatch" style="background:#f44336" data-color="#f44336" data-target="heart"></div>
+        <div class="swatch" style="background:#e91e63" data-color="#e91e63" data-target="heart"></div>
+        <div class="swatch" style="background:#9c27b0" data-color="#9c27b0" data-target="heart"></div>
+        <div class="swatch" style="background:#ff5722" data-color="#ff5722" data-target="heart"></div>
+        <div class="swatch" style="background:#2196f3" data-color="#2196f3" data-target="heart"></div>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Custom Color Picker</div>
+      <input type="color" id="customColorPicker" value="#e91e8c" style="width:100%;height:44px;border:none;border-radius:12px;cursor:pointer;padding:2px;">
+    </div>
+  </div>
+
+  <!-- BACKGROUND TAB -->
+  <div class="tab-content" data-tab="background">
+    <div class="edit-row">
+      <div class="edit-label">Choose Theme</div>
+      <div class="theme-grid">
+        <div class="theme-card selected" style="background:linear-gradient(160deg,#fff0f7,#fde8f2,#f5e8ff)" data-bg="linear-gradient(160deg,#fff0f7 0%,#fde8f2 50%,#f5e8ff 100%)">🌸 Pink Dream</div>
+        <div class="theme-card" style="background:linear-gradient(160deg,#e8f5e9,#f1f8e9,#e0f7fa)" data-bg="linear-gradient(160deg,#e8f5e9 0%,#f1f8e9 50%,#e0f7fa 100%)">🌿 Nature</div>
+        <div class="theme-card" style="background:linear-gradient(160deg,#e3f2fd,#e8eaf6,#f3e5f5)" data-bg="linear-gradient(160deg,#e3f2fd 0%,#e8eaf6 50%,#f3e5f5 100%)">💙 Sky Blue</div>
+        <div class="theme-card" style="background:linear-gradient(160deg,#fff8e1,#fff3e0,#fce4ec)" data-bg="linear-gradient(160deg,#fff8e1 0%,#fff3e0 50%,#fce4ec 100%)">🌅 Sunrise</div>
+        <div class="theme-card" style="background:linear-gradient(160deg,#1a1a2e,#16213e,#0f3460)" data-bg="linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)">🌙 Night</div>
+        <div class="theme-card" style="background:linear-gradient(160deg,#f3e5f5,#e8eaf6,#fce4ec)" data-bg="linear-gradient(160deg,#f3e5f5 0%,#e8eaf6 50%,#fce4ec 100%)">💜 Lavender</div>
+        <div class="theme-card" style="background:linear-gradient(160deg,#fff9c4,#fff8e1,#ffe0b2)" data-bg="linear-gradient(160deg,#fff9c4 0%,#fff8e1 50%,#ffe0b2 100%)">⭐ Golden</div>
+        <div class="theme-card" style="background:linear-gradient(160deg,#fce4ec,#f8bbd0,#f48fb1)" data-bg="linear-gradient(160deg,#fce4ec 0%,#f8bbd0 50%,#f48fb1 100%)">🌺 Deep Pink</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKERS TAB -->
+  <div class="tab-content" data-tab="stickers">
+    <div class="edit-row">
+      <div class="edit-label">Show / Hide Stickers</div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">🦋 Butterfly</span>
+        <label class="toggle-switch"><input type="checkbox" checked data-sticker="stickerButterfly,stickerButterflyText"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">❤️ I Love You</span>
+        <label class="toggle-switch"><input type="checkbox" checked data-sticker="stickerLove"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">〰️ Heartbeat</span>
+        <label class="toggle-switch"><input type="checkbox" checked data-sticker="stickerHeartbeat"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">📷 Camera</span>
+        <label class="toggle-switch"><input type="checkbox" checked data-sticker="stickerCamera"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">🌸 Flower</span>
+        <label class="toggle-switch"><input type="checkbox" checked data-sticker="stickerFlower"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">∞ Forever</span>
+        <label class="toggle-switch"><input type="checkbox" checked data-sticker="stickerForever"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">🎈 Balloons</span>
+        <label class="toggle-switch"><input type="checkbox" checked data-sticker="stickerBalloons"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">💕 Floating Hearts</span>
+        <label class="toggle-switch"><input type="checkbox" checked id="heartsToggle"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- WATERMARK TAB -->
+  <div class="tab-content" data-tab="watermark">
+    <div class="edit-row">
+      <div class="edit-label">Watermark Text</div>
+      <input class="edit-input" id="watermarkInput" type="text" value="Vetri Editz Official" placeholder="Your name / brand...">
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Watermark Visibility</div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">Show Watermark</span>
+        <label class="toggle-switch"><input type="checkbox" checked id="watermarkToggle"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- MUSIC TAB -->
+  <div class="tab-content" data-tab="music">
+    <div class="edit-row">
+      <div class="edit-label">Now Playing</div>
+      <div class="music-now-playing" id="nowPlayingBar">
+        <span class="now-play-icon">🎵</span>
+        <div class="now-play-info">
+          <div class="now-play-name" id="nowPlayingName">Romantic Melody</div>
+          <div class="now-play-sub">● Playing</div>
+        </div>
+        <button class="now-play-stop" id="stopMusicBtn">⏹ Stop</button>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Volume</div>
+      <div class="volume-row">
+        <span class="vol-icon">🔈</span>
+        <input class="range-slider" id="volumeSlider" type="range" min="0" max="100" value="70">
+        <span class="vol-icon">🔊</span>
+        <span class="slider-val" id="volumeVal">70%</span>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Choose a Song</div>
+      <div class="music-preset-grid">
+        <div class="music-preset-card" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" data-name="Romantic Melody">
+          <div class="song-icon">💕</div>
+          <div class="song-name">Romantic</div>
+          <div class="song-mood">Sweet & Soft</div>
+        </div>
+        <div class="music-preset-card" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" data-name="Happy Vibes">
+          <div class="song-icon">🌸</div>
+          <div class="song-name">Happy Vibes</div>
+          <div class="song-mood">Upbeat & Fun</div>
+        </div>
+        <div class="music-preset-card" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" data-name="Dreamy Love">
+          <div class="song-icon">🌙</div>
+          <div class="song-name">Dreamy Love</div>
+          <div class="song-mood">Calm & Cozy</div>
+        </div>
+        <div class="music-preset-card" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" data-name="Celebration">
+          <div class="song-icon">🎉</div>
+          <div class="song-name">Celebration</div>
+          <div class="song-mood">Joyful & Bright</div>
+        </div>
+        <div class="music-preset-card" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" data-name="Gentle Heart">
+          <div class="song-icon">🕊️</div>
+          <div class="song-name">Gentle Heart</div>
+          <div class="song-mood">Peaceful & Pure</div>
+        </div>
+        <div class="music-preset-card" data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" data-name="Forever Love">
+          <div class="song-icon">♾️</div>
+          <div class="song-name">Forever Love</div>
+          <div class="song-mood">Deep & Soulful</div>
+        </div>
+      </div>
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Upload Your Own Song</div>
+      <div class="music-upload-area" id="musicUploadArea">
+        <div class="upload-icon">🎶</div>
+        <div class="upload-text">Tap to upload your song</div>
+        <div class="upload-sub">Supports MP3, WAV, OGG, M4A</div>
+      </div>
+      <input type="file" id="musicFileInput" accept="audio/*" style="display:none">
+    </div>
+    <div class="edit-row">
+      <div class="edit-label">Loop Music</div>
+      <div class="sticker-toggle-row">
+        <span class="sticker-toggle-label">🔁 Loop / Repeat</span>
+        <label class="toggle-switch"><input type="checkbox" checked id="loopToggle"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM ACTION BAR -->
+<div class="action-bar">
+  <button class="action-btn btn-edit" id="editBtn">✏️ Edit</button>
+  <button class="action-btn btn-save" id="saveBtn">⬇️ Save</button>
+  <button class="action-btn btn-share" id="shareBtn">🔗 Share</button>
+</div>
+
 <audio id="bgMusic" loop>
-  <source src="music.mp3" type="audio/mpeg">
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-  const container = document.getElementById('heartsContainer');
+  // ── Floating hearts ──
+  const heartsContainer = document.getElementById('heartsContainer');
   const hearts = ['❤️','🌸','💕','💗','🩷'];
+  let heartsEnabled = true;
   function createHeart() {
+    if (!heartsEnabled) return;
     const h = document.createElement('div');
     h.className = 'fheart';
     h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
@@ -514,27 +784,62 @@
     h.style.animationDuration = (4 + Math.random() * 4) + 's';
     h.style.animationDelay = (Math.random() * 2) + 's';
     h.style.fontSize = (12 + Math.random() * 14) + 'px';
-    container.appendChild(h);
+    heartsContainer.appendChild(h);
     setTimeout(() => h.remove(), 8000);
   }
   setInterval(createHeart, 800);
 
+  // ── Music ──
   const audio = document.getElementById('bgMusic');
-  const btn = document.getElementById('musicBtn');
+  const musicBtn = document.getElementById('musicBtn');
   let playing = false;
-  btn.addEventListener('click', () => {
-    if (playing) { audio.pause(); playing = false; btn.style.background = 'white'; }
-    else { audio.play().catch(() => {}); playing = true; btn.style.background = '#fce4ec'; }
+  let interacted = false;
+
+  // Auto-play music on first user interaction with the poster
+  function startMusicOnInteraction() {
+    if (interacted) return;
+    interacted = true;
+    audio.play().then(() => {
+      playing = true;
+      musicBtn.classList.add('visible');
+      musicBtn.style.background = '#fce4ec';
+    }).catch(() => {
+      // Autoplay blocked - still show button so user can tap manually
+      musicBtn.classList.add('visible');
+    });
+    // Remove listeners after first interaction
+    document.removeEventListener('click', startMusicOnInteraction);
+    document.removeEventListener('touchstart', startMusicOnInteraction);
+    document.removeEventListener('scroll', startMusicOnInteraction);
+  }
+
+  document.addEventListener('click', startMusicOnInteraction);
+  document.addEventListener('touchstart', startMusicOnInteraction);
+  document.addEventListener('scroll', startMusicOnInteraction);
+
+  // Music btn toggle (pause / resume)
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // don't re-trigger interaction handler
+    if (playing) {
+      audio.pause();
+      playing = false;
+      musicBtn.style.background = 'white';
+      musicBtn.title = 'Play music';
+    } else {
+      audio.play().catch(() => {});
+      playing = true;
+      musicBtn.style.background = '#fce4ec';
+      musicBtn.title = 'Pause music';
+    }
   });
 
+  // ── Image upload ──
   document.querySelectorAll('.collage-cell, .bottom-cell, .hero-img').forEach(cell => {
     cell.addEventListener('click', () => {
       const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
+      input.type = 'file'; input.accept = 'image/*';
       input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const url = URL.createObjectURL(file);
         const placeholder = cell.querySelector('.placeholder');
         if (placeholder) placeholder.remove();
@@ -546,6 +851,267 @@
       input.click();
     });
   });
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── Capture ──
+  async function capturePoster() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('active');
+    try {
+      const canvas = await html2canvas(document.getElementById('poster'), {
+        useCORS: true, allowTaint: true, scale: 2, backgroundColor: null, logging: false
+      });
+      overlay.classList.remove('active');
+      return canvas;
+    } catch(e) {
+      overlay.classList.remove('active');
+      showToast('❌ Error capturing poster');
+      return null;
+    }
+  }
+
+  // ── Save ──
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const canvas = await capturePoster(); if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = 'Rukmini_poster.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click(); showToast('✅ Image saved!');
+  });
+
+  // ── Share ──
+  document.getElementById('shareBtn').addEventListener('click', async () => {
+    const canvas = await capturePoster(); if (!canvas) return;
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], 'Rukmini_poster.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'Rukmini ❤️', text: 'Made with love 💕' });
+          showToast('✅ Shared!');
+        } catch(e) { if (e.name !== 'AbortError') showToast('❌ Share failed'); }
+      } else {
+        const link = document.createElement('a');
+        link.download = 'Rukmini_poster.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click(); showToast('📥 Downloaded!');
+      }
+    }, 'image/png');
+  });
+
+  // ── Edit Panel ──
+  const editPanel = document.getElementById('editPanel');
+  const panelOverlay = document.getElementById('panelOverlay');
+
+  function openPanel() { editPanel.classList.add('open'); panelOverlay.classList.add('open'); }
+  function closePanel() { editPanel.classList.remove('open'); panelOverlay.classList.remove('open'); }
+
+  document.getElementById('editBtn').addEventListener('click', openPanel);
+  document.getElementById('panelClose').addEventListener('click', closePanel);
+  panelOverlay.addEventListener('click', closePanel);
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector('.tab-content[data-tab="' + btn.dataset.tab + '"]').classList.add('active');
+    });
+  });
+
+  // ── Name input ──
+  const nameEl = document.getElementById('nameTitleEl');
+  document.getElementById('nameInput').addEventListener('input', (e) => {
+    nameEl.textContent = e.target.value || 'Name';
+  });
+
+  // ── Font size slider ──
+  const fontSlider = document.getElementById('fontSizeSlider');
+  const fontVal = document.getElementById('fontSizeVal');
+  fontSlider.addEventListener('input', () => {
+    nameEl.style.fontSize = fontSlider.value + 'px';
+    fontVal.textContent = fontSlider.value + 'px';
+  });
+
+  // ── Love text ──
+  document.getElementById('loveInput').addEventListener('input', (e) => {
+    document.getElementById('stickerLove').innerHTML = e.target.value;
+  });
+
+  // ── Forever text ──
+  document.getElementById('foreverInput').addEventListener('input', (e) => {
+    document.getElementById('stickerForever').textContent = e.target.value;
+  });
+
+  // ── Butterfly text ──
+  document.getElementById('butterflyInput').addEventListener('input', (e) => {
+    document.getElementById('stickerButterflyText').textContent = e.target.value;
+  });
+
+  // ── Watermark text ──
+  document.getElementById('watermarkInput').addEventListener('input', (e) => {
+    document.getElementById('watermarkEl').textContent = e.target.value;
+  });
+
+  // ── Watermark toggle ──
+  document.getElementById('watermarkToggle').addEventListener('change', (e) => {
+    document.getElementById('watermarkEl').style.display = e.target.checked ? '' : 'none';
+  });
+
+  // ── Color swatches ──
+  document.querySelectorAll('.swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      const target = sw.dataset.target;
+      const color = sw.dataset.color;
+      document.querySelectorAll('.swatch[data-target="' + target + '"]').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      if (target === 'name') nameEl.style.color = color;
+      if (target === 'love') document.getElementById('stickerLove').style.color = color;
+      if (target === 'forever') document.getElementById('stickerForever').style.color = color;
+      if (target === 'heart') {
+        document.querySelectorAll('.heart-icon, .heartbeat-line').forEach(el => el.style.color = color);
+      }
+    });
+  });
+
+  // ── Custom color picker ──
+  document.getElementById('customColorPicker').addEventListener('input', (e) => {
+    nameEl.style.color = e.target.value;
+  });
+
+  // ── Background themes ──
+  document.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      document.getElementById('poster').style.background = card.dataset.bg;
+    });
+  });
+
+  // ── Sticker toggles ──
+  document.querySelectorAll('[data-sticker]').forEach(toggle => {
+    toggle.addEventListener('change', () => {
+      const ids = toggle.dataset.sticker.split(',');
+      ids.forEach(id => {
+        const el = document.getElementById(id.trim());
+        if (el) el.style.display = toggle.checked ? '' : 'none';
+      });
+    });
+  });
+
+  // ── Floating hearts toggle ──
+  document.getElementById('heartsToggle').addEventListener('change', (e) => {
+    heartsEnabled = e.target.checked;
+    if (!heartsEnabled) heartsContainer.innerHTML = '';
+  });
+
+  // Offline detection
+  function updateOnlineStatus() {
+    const banner = document.getElementById('offlineBanner');
+    if (!navigator.onLine) banner.classList.add('show');
+    else banner.classList.remove('show');
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
+  // PWA Install prompt
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBtn').classList.add('show');
+  });
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('installBtn').classList.remove('show');
+    }
+  });
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBtn').classList.remove('show');
+    showToast('✅ App installed! Works offline now.');
+  });
+
+
+  // ── Music Editor ──
+  function setMusic(src, name) {
+    const wasPlaying = playing;
+    audio.pause();
+    audio.src = src;
+    audio.load();
+    // Update now playing bar
+    document.getElementById('nowPlayingName').textContent = name;
+    document.getElementById('nowPlayingBar').classList.add('show');
+    // Highlight selected card
+    document.querySelectorAll('.music-preset-card').forEach(c => c.classList.remove('playing'));
+    const card = document.querySelector('.music-preset-card[data-name="' + name + '"]');
+    if (card) card.classList.add('playing');
+    // Play
+    audio.play().then(() => {
+      playing = true;
+      interacted = true;
+      musicBtn.classList.add('visible');
+      musicBtn.style.background = '#fce4ec';
+    }).catch(() => {});
+    showToast('🎵 Now playing: ' + name);
+  }
+
+  // Preset cards
+  document.querySelectorAll('.music-preset-card').forEach(card => {
+    card.addEventListener('click', () => {
+      setMusic(card.dataset.src, card.dataset.name);
+    });
+  });
+
+  // Upload own music
+  document.getElementById('musicUploadArea').addEventListener('click', () => {
+    document.getElementById('musicFileInput').click();
+  });
+  document.getElementById('musicFileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const name = file.name.replace(/\.[^/.]+$/, '');
+    // Clear preset highlights
+    document.querySelectorAll('.music-preset-card').forEach(c => c.classList.remove('playing'));
+    document.getElementById('musicUploadArea').innerHTML = '<div class="upload-icon">✅</div><div class="upload-text">' + name + '</div><div class="upload-sub">Tap to change</div>';
+    setMusic(url, name);
+  });
+
+  // Stop button
+  document.getElementById('stopMusicBtn').addEventListener('click', () => {
+    audio.pause();
+    audio.currentTime = 0;
+    playing = false;
+    musicBtn.style.background = 'white';
+    document.getElementById('nowPlayingBar').classList.remove('show');
+    document.querySelectorAll('.music-preset-card').forEach(c => c.classList.remove('playing'));
+    showToast('⏹ Music stopped');
+  });
+
+  // Volume slider
+  const volumeSlider = document.getElementById('volumeSlider');
+  const volumeVal = document.getElementById('volumeVal');
+  audio.volume = 0.7;
+  volumeSlider.addEventListener('input', () => {
+    audio.volume = volumeSlider.value / 100;
+    volumeVal.textContent = volumeSlider.value + '%';
+  });
+
+  // Loop toggle
+  document.getElementById('loopToggle').addEventListener('change', (e) => {
+    audio.loop = e.target.checked;
+  });
+
 </script>
 </body>
 </html>
